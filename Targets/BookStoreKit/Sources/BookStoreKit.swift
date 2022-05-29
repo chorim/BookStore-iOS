@@ -1,4 +1,5 @@
 import Foundation
+import RIBs
 
 public final class BookStoreKit {
   public static func hello() {
