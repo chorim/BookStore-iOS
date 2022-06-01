@@ -24,4 +24,10 @@ final class RootViewController: UIViewController, RootPresentable, RootViewContr
     super.viewDidLoad()
     print("Root RIB has been detached")
   }
+  
+  // MARK: RootViewControllable
+  func present(_ viewController: ViewControllable, animated: Bool) {
+    viewController.uiviewController.modalPresentationStyle = .overFullScreen
+    super.present(viewController.uiviewController, animated: animated)
+  }
 }
