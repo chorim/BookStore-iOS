@@ -16,6 +16,8 @@ protocol ListRouting: ViewableRouting {
 protocol ListPresentable: Presentable {
   var listener: ListPresentableListener? { get set }
   // TODO: Declare methods the interactor can invoke the presenter to present data.
+  func updateUI(_ bookList: BookList)
+  func updateUI(error: Error)
 }
 
 protocol ListListener: AnyObject {
@@ -42,5 +44,22 @@ final class ListInteractor: PresentableInteractor<ListPresentable>, ListInteract
   override func willResignActive() {
     super.willResignActive()
     // TODO: Pause any business logic.
+  }
+  
+  // MARK: ListPresentableListener
+  func fetchBooks(_ page: Int?) async {
+    do {
+      var parameters: [String: Any] = [:]
+      if let page = page {
+        parameters["page"] = page
+      }
+      
+      let bookList = try await APIClient.shared.request(BookStoreResource.new,
+                                                        parameters: parameters,
+                                                        model: BookList.self)
+      presenter.updateUI(bookList)
+    } catch let error {
+      presenter.updateUI(error: error)
+    }
   }
 }
