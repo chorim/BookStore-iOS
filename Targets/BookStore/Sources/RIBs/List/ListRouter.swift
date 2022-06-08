@@ -8,7 +8,7 @@
 
 import RIBs
 
-protocol ListInteractable: Interactable {
+protocol ListInteractable: Interactable, SearchListener {
   var router: ListRouting? { get set }
   var listener: ListListener? { get set }
 }
@@ -20,8 +20,20 @@ protocol ListViewControllable: ViewControllable {
 final class ListRouter: ViewableRouter<ListInteractable, ListViewControllable>, ListRouting {
   
   // TODO: Constructor inject child builder protocols to allow building children.
-  override init(interactor: ListInteractable, viewController: ListViewControllable) {
+  init(interactor: ListInteractable,
+       viewController: ListViewControllable,
+       searchBuilder: SearchBuildable) {
+    self.searchBuilder = searchBuilder
     super.init(interactor: interactor, viewController: viewController)
     interactor.router = self
   }
+  
+  func attachSearchController() {
+    let searchRouting = searchBuilder.build(withListener: interactor)
+    attachChild(searchRouting)
+  }
+  
+  // MARK: - Private
+  private let searchBuilder: SearchBuildable
+  private var searchRouting: SearchRouting?
 }

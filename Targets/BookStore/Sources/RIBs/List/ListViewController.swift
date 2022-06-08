@@ -94,3 +94,10 @@ private extension ListViewController {
     snapshot.appendSections([0])
   }
 }
+
+// MARK: SearchViewControllable
+extension ListViewController: SearchViewControllable {
+  func setupSearchController(_ searchController: UISearchController?) {
+    navigationItem.searchController = searchController
+  }
+}

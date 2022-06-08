@@ -11,6 +11,7 @@ import RxSwift
 
 protocol ListRouting: ViewableRouting {
   // TODO: Declare methods the interactor can invoke to manage sub-tree via the router.
+  func attachSearchController()
 }
 
 protocol ListPresentable: Presentable {
@@ -39,6 +40,7 @@ final class ListInteractor: PresentableInteractor<ListPresentable>, ListInteract
   override func didBecomeActive() {
     super.didBecomeActive()
     // TODO: Implement business logic here.
+    router?.attachSearchController()
   }
   
   override func willResignActive() {

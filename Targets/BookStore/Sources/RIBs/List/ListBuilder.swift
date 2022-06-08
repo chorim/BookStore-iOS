@@ -7,6 +7,7 @@
 //
 
 import RIBs
+import UIKit
 
 protocol ListDependency: Dependency {
   // TODO: Declare the set of dependencies required by this RIB, but cannot be
@@ -16,6 +17,12 @@ protocol ListDependency: Dependency {
 final class ListComponent: Component<ListDependency> {
   
   // TODO: Declare 'fileprivate' dependencies that are only used by this RIB.
+  let listViewController: ListViewController
+  
+  init(dependency: ListDependency, listViewController: ListViewController) {
+    self.listViewController = listViewController
+    super.init(dependency: dependency)
+  }
 }
 
 // MARK: - Builder
@@ -31,10 +38,13 @@ final class ListBuilder: Builder<ListDependency>, ListBuildable {
   }
   
   func build(withListener listener: ListListener) -> ListRouting {
-    let component = ListComponent(dependency: dependency)
     let viewController = ListViewController()
+    let component = ListComponent(dependency: dependency, listViewController: viewController)
     let interactor = ListInteractor(presenter: viewController)
     interactor.listener = listener
-    return ListRouter(interactor: interactor, viewController: viewController)
+    let searchBuilder = SearchBuilder(dependency: component)
+    return ListRouter(interactor: interactor,
+                      viewController: viewController,
+                      searchBuilder: searchBuilder)
   }
 }
