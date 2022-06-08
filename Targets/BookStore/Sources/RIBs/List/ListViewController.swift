@@ -77,6 +77,8 @@ final class ListViewController: UIViewController, ListPresentable, ListViewContr
 
 private extension ListViewController {
   func setupUI() {
+    title = "BookStore"
+    
     tableView.estimatedRowHeight = UITableView.automaticDimension
     tableView.register(UINib(nibName: "ListBookCell", bundle: Bundle.main),
                        forCellReuseIdentifier: "ListBookCell")

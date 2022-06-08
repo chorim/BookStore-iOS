@@ -7,6 +7,7 @@
 //
 
 import RIBs
+import UIKit
 
 protocol RootInteractable: Interactable, ListListener {
   var router: RootRouting? { get set }
@@ -38,6 +39,7 @@ final class RootRouter: LaunchRouter<RootInteractable, RootViewControllable>, Ro
     self.listRouting = listRouting
     attachChild(listRouting)
     
-    viewController.present(listRouting.viewControllable, animated: false)
+    let navigationController = UINavigationController(viewControllable: listRouting.viewControllable)
+    viewController.present(navigationController, animated: false)
   }
 }
