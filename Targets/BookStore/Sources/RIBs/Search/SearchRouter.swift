@@ -9,7 +9,7 @@
 import RIBs
 import UIKit
 
-protocol SearchInteractable: Interactable {
+protocol SearchInteractable: Interactable, SearchResultsListener {
   var router: SearchRouting? { get set }
   var listener: SearchListener? { get set }
 }
@@ -24,8 +24,11 @@ protocol SearchViewControllable: ViewControllable {
 final class SearchRouter: Router<SearchInteractable>, SearchRouting {
   
   // TODO: Constructor inject child builder protocols to allow building children.
-  init(interactor: SearchInteractable, viewController: SearchViewControllable) {
+  init(interactor: SearchInteractable,
+       viewController: SearchViewControllable,
+       searchResultsBuilder: SearchResultsBuildable) {
     self.viewController = viewController
+    self.searchResultsBuilder = searchResultsBuilder
     super.init(interactor: interactor)
     interactor.router = self
   }
@@ -33,11 +36,22 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
   func cleanupViews() {
     // TODO: Since this router does not own its view, it needs to cleanup the views
     // it may have added to the view hierarchy, when its interactor is deactivated.
+    guard let searchResultsRouting = searchResultsRouting else { return }
+    
+    self.searchResultsRouting = nil
+    detachChild(searchResultsRouting)
+    
     viewController.setupSearchController(nil)
   }
   
   func setupViews() {
-    let searchController = UISearchController(searchResultsController: nil)
+    guard searchResultsRouting == nil else { return }
+    
+    let searchResultsRouting = searchResultsBuilder.build(withListener: interactor)
+    let searchResultsViewController = searchResultsRouting.viewControllable.uiviewController
+    attachChild(searchResultsRouting)
+    
+    let searchController = UISearchController(searchResultsController: searchResultsViewController)
     searchController.searchBar.placeholder = "Search books"
     searchController.automaticallyShowsCancelButton = true
     searchController.obscuresBackgroundDuringPresentation = false
@@ -47,4 +61,7 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
   // MARK: - Private
   
   private let viewController: SearchViewControllable
+  
+  private let searchResultsBuilder: SearchResultsBuildable
+  private var searchResultsRouting: ViewableRouting?
 }

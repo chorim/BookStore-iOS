@@ -16,7 +16,7 @@ protocol SearchDependency: Dependency {
   // created by this RIB.
 }
 
-final class SearchComponent: Component<SearchDependency> {
+final class SearchComponent: Component<SearchDependency>, SearchResultsDependency {
   
   // TODO: Make sure to convert the variable into lower-camelcase.
   fileprivate var searchViewController: SearchViewControllable {
@@ -42,6 +42,9 @@ final class SearchBuilder: Builder<SearchDependency>, SearchBuildable {
     let component = SearchComponent(dependency: dependency)
     let interactor = SearchInteractor()
     interactor.listener = listener
-    return SearchRouter(interactor: interactor, viewController: component.searchViewController)
+    let searchResultsBuilder = SearchResultsBuilder(dependency: component)
+    return SearchRouter(interactor: interactor,
+                        viewController: component.searchViewController,
+                        searchResultsBuilder: searchResultsBuilder)
   }
 }
