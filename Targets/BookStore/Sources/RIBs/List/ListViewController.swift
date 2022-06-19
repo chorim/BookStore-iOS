@@ -29,7 +29,6 @@ final class ListViewController: UIViewController, ListPresentable, ListViewContr
   @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
   
   private var task: Task<(), Never>?
-  private var page: Int = 1
   
   private var books: [Book] = []
   private var dataSource: DataSource!
@@ -44,9 +43,7 @@ final class ListViewController: UIViewController, ListPresentable, ListViewContr
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     task = Task {
-      await listener?.fetchBooks(page)
-      
-      activityIndicatorView.stopAnimating()
+      await listener?.fetchBooks(nil)
     }
   }
   
@@ -57,13 +54,16 @@ final class ListViewController: UIViewController, ListPresentable, ListViewContr
     }
   }
   
+  @MainActor
   func updateUI(_ bookList: BookList) {
-    self.books += bookList.books
+    activityIndicatorView.stopAnimating()
+    books += bookList.books
     
     snapshot.appendItems(books)
     dataSource.apply(snapshot, animatingDifferences: false)
   }
   
+  @MainActor
   func updateUI(error: Error) {
     let alertController = UIAlertController(title: "Error",
                                             message: error.localizedDescription,
@@ -80,7 +80,7 @@ private extension ListViewController {
     title = "BookStore"
     
     tableView.estimatedRowHeight = UITableView.automaticDimension
-    tableView.register(UINib(nibName: "ListBookCell", bundle: Bundle.main),
+    tableView.register(UINib(nibName: "ListBookCell", bundle: Bundle.module),
                        forCellReuseIdentifier: "ListBookCell")
     dataSource = DataSource(tableView: tableView, cellProvider: { tableView, indexPath, item in
       let cell = tableView.dequeueReusableCell(withIdentifier: "ListBookCell",

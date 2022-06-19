@@ -17,7 +17,9 @@ protocol ListRouting: ViewableRouting {
 protocol ListPresentable: Presentable {
   var listener: ListPresentableListener? { get set }
   // TODO: Declare methods the interactor can invoke the presenter to present data.
+  @MainActor
   func updateUI(_ bookList: BookList)
+  @MainActor
   func updateUI(error: Error)
 }
 
@@ -59,9 +61,9 @@ final class ListInteractor: PresentableInteractor<ListPresentable>, ListInteract
       let bookList = try await APIClient.shared.request(BookStoreResource.new,
                                                         parameters: parameters,
                                                         model: BookList.self)
-      presenter.updateUI(bookList)
+      await presenter.updateUI(bookList)
     } catch let error {
-      presenter.updateUI(error: error)
+      await presenter.updateUI(error: error)
     }
   }
 }
