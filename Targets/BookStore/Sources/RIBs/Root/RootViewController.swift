@@ -22,7 +22,7 @@ final class RootViewController: UIViewController, RootPresentable, RootViewContr
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    print("Root RIB has been attached")
+    Logger.debug("Root RIB has been attached")
   }
   
   // MARK: RootViewControllable

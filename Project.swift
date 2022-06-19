@@ -23,4 +23,4 @@ import ProjectDescriptionHelpers
 let project = Project.app(name: "BookStore",
                           platform: .iOS,
                           additionalTargets: ["BookStoreKit", "BookStoreUI"],
-                          additionalPackages: ["RIBs"])
+                          additionalPackages: ["RIBs", "Logging"])

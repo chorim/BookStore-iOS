@@ -3,6 +3,8 @@ import BookStoreKit
 import BookStoreUI
 import RIBs
 
+let Logger = App.logger
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
   
@@ -16,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     window = UIWindow(frame: UIScreen.main.bounds)
     launchRouter = RootBuilder(dependency: AppComponent()).build()
     launchRouter?.launch(from: window!)
+    Logger.info("LaunchRouter has be launch")
     return true
   }
   

@@ -31,7 +31,7 @@ final class SearchInteractor: Interactor, SearchInteractable {
   override func didBecomeActive() {
     super.didBecomeActive()
     // TODO: Implement business logic here.
-    print("Search RIB attached")
+    Logger.debug("Search RIB attached")
     router?.setupViews()
   }
   

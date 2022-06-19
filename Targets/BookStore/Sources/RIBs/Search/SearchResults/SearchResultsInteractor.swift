@@ -37,7 +37,7 @@ final class SearchResultsInteractor: PresentableInteractor<SearchResultsPresenta
   override func didBecomeActive() {
     super.didBecomeActive()
     // TODO: Implement business logic here.
-    print("SearchResults RIB attached")
+    Logger.debug("SearchResults RIB attached")
   }
   
   override func willResignActive() {
