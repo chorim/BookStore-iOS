@@ -51,11 +51,15 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
     let searchResultsViewController = searchResultsRouting.viewControllable.uiviewController
     attachChild(searchResultsRouting)
     
+    assert(searchResultsViewController is SearchResultsViewController, "Coudln't cast SearchResultsViewController")
+    
     let searchController = UISearchController(searchResultsController: searchResultsViewController)
     searchController.searchBar.placeholder = "Search books"
     searchController.automaticallyShowsCancelButton = true
     searchController.obscuresBackgroundDuringPresentation = false
     searchController.hidesNavigationBarDuringPresentation = true
+    searchController.searchBar.delegate = (searchResultsViewController as? SearchResultsViewController)
+    
     viewController.setupSearchController(searchController)
   }
   // MARK: - Private
