@@ -14,6 +14,8 @@ class ListBookCell: UITableViewCell {
   @IBOutlet weak var titleLabel: UILabel!
   @IBOutlet weak var descLabel: UILabel!
   
+  private var task: Task<(), Never>?
+  
   override func awakeFromNib() {
     super.awakeFromNib()
     // Initialization code
@@ -25,8 +27,22 @@ class ListBookCell: UITableViewCell {
     // Configure the view for the selected state
   }
   
+  override func prepareForReuse() {
+    super.prepareForReuse()
+    if let task = task, !task.isCancelled {
+      task.cancel()
+    }
+    
+    task = Task { @MainActor in
+      self.thumbImageView.setImage(nil)
+      self.titleLabel.text = nil
+      self.descLabel.text = nil
+      self.descLabel.sizeToFit()
+    }
+  }
+  
   func setupUI(_ book: Book) {
-    DispatchQueue.main.async {
+    task = Task { @MainActor in
       self.thumbImageView.setImage(book.image)
       self.titleLabel.text = book.title
       self.descLabel.text = book.subtitle
