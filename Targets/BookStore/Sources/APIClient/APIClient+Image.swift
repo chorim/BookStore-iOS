@@ -35,7 +35,7 @@ extension APIClient {
 
 extension UIImageView {
   func setImage(_ imageUrl: String) {
-    Task.detached(priority: .utility) {
+    Task.detached(priority: .background) {
       try Task.checkCancellation()
       
       guard let imageURL = URL(string: imageUrl) else {
