@@ -10,7 +10,7 @@ import Foundation
 
 extension APIClient {
   func request<Model: Decodable>(_ resource: URLResource,
-                                 parameters: Parameters,
+                                 parameters: Parameters = [:],
                                  model: Model.Type) async throws -> Model {
     let urlRequest = URLRequest(resource: resource, parameters)
     let (data, _) = try await session.data(for: urlRequest)
