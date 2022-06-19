@@ -63,7 +63,9 @@ extension Project {
       bundleId: "\(bundleId).\(name)",
       infoPlist: .extendingDefault(with: infoPlist),
       sources: ["Targets/\(name)/Sources/**"],
-      resources: ["Targets/\(name)/Resources/**"],
+      resources: ["Targets/\(name)/Resources/**",
+                  "Targets/\(name)/Sources/RIBs/**/*.storyboard",
+                  "Targets/\(name)/Sources/RIBs/**/*.xib"],
       dependencies: dependencies
     )
     
