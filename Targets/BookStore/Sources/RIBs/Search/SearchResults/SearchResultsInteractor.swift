@@ -22,6 +22,7 @@ protocol SearchResultsPresentable: Presentable {
 
 protocol SearchResultsListener: AnyObject {
   // TODO: Declare methods the interactor can invoke to communicate with other RIBs.
+  var searchBooks: PublishSubject<(String?, Int?)> { get }
 }
 
 final class SearchResultsInteractor: PresentableInteractor<SearchResultsPresentable>, SearchResultsInteractable, SearchResultsPresentableListener {
@@ -57,35 +58,9 @@ private extension SearchResultsInteractor {
     searchBooks
       .debounce(.milliseconds(400), scheduler: MainScheduler.instance)
       .filter { $0.0 != nil && ($0.0?.count ?? 0) > 2 }
-      .distinctUntilChanged(at: \.0)
-      .flatMap { (query, page) -> Observable<Result<BookList, Error>> in
-        return AsyncThrowingStream<BookList, Error> { continuation in
-          Task {
-            if let query = query {
-              do {
-                let resource = BookStoreResource.search(query, page)
-                let bookList = try await APIClient.shared.request(resource,
-                                                                  model: BookList.self)
-                continuation.yield(bookList)
-                continuation.finish()
-              } catch let error {
-                continuation.finish(throwing: error)
-              }
-            }
-          }
-        }
-        .asObservable()
-        .map { .success($0) }
-        .catch { .just(.failure($0)) }
-      }
-      .observe(on: MainScheduler.asyncInstance)
-      .subscribe(onNext: { [weak self] result in
-        switch result {
-        case .success(let bookList):
-          self?.presenter.updateUI(bookList)
-        case .failure(let error):
-          self?.presenter.updateUI(error: error)
-        }
+      .subscribe(onNext: { [weak self] (query, page) in
+        // 실제로 검색을 실행하는 RIB으로 작업을 위임함
+        self?.listener?.searchBooks.onNext((query, page))
       })
       .disposeOnDeactivate(interactor: self)
   }

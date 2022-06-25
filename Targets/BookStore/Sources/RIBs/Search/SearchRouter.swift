@@ -39,6 +39,7 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
     guard let searchResultsRouting = searchResultsRouting else { return }
     
     self.searchResultsRouting = nil
+    self.searchResultsViewController = nil
     detachChild(searchResultsRouting)
     
     viewController.setupSearchController(nil)
@@ -48,24 +49,37 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
     guard searchResultsRouting == nil else { return }
     
     let searchResultsRouting = searchResultsBuilder.build(withListener: interactor)
-    let searchResultsViewController = searchResultsRouting.viewControllable.uiviewController
+    let searchResultsViewController = searchResultsRouting.viewControllable.uiviewController as? SearchResultsViewController
     attachChild(searchResultsRouting)
     
-    assert(searchResultsViewController is SearchResultsViewController, "Coudln't cast SearchResultsViewController")
+    assert(searchResultsViewController != nil, "Coudln't cast SearchResultsViewController")
     
     let searchController = UISearchController(searchResultsController: searchResultsViewController)
     searchController.searchBar.placeholder = "Search books"
     searchController.automaticallyShowsCancelButton = true
     searchController.obscuresBackgroundDuringPresentation = false
     searchController.hidesNavigationBarDuringPresentation = true
-    searchController.searchBar.delegate = (searchResultsViewController as? SearchResultsViewController)
+    searchController.searchBar.delegate = searchResultsViewController
+    self.searchResultsViewController = searchResultsViewController
     
     viewController.setupSearchController(searchController)
   }
+  
+  func updateResultsUI(_ bookList: BookList) {
+    assert(searchResultsViewController != nil, "The SearchResultsViewController has not been initialized")
+    searchResultsViewController?.updateUI(bookList)
+  }
+  
+  func updateResultsUI(error: Error) {
+    assert(searchResultsViewController != nil, "The SearchResultsViewController has not been initialized")
+    searchResultsViewController?.updateUI(error: error)
+  }
+  
   // MARK: - Private
   
   private let viewController: SearchViewControllable
   
   private let searchResultsBuilder: SearchResultsBuildable
   private var searchResultsRouting: ViewableRouting?
+  private var searchResultsViewController: SearchResultsViewController?
 }

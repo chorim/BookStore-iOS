@@ -12,6 +12,9 @@ import RxSwift
 protocol SearchRouting: Routing {
   func cleanupViews()
   func setupViews()
+  
+  func updateResultsUI(_ bookList: BookList)
+  func updateResultsUI(error: Error)
   // TODO: Declare methods the interactor can invoke to manage sub-tree via the router.
 }
 
@@ -33,6 +36,7 @@ final class SearchInteractor: Interactor, SearchInteractable {
     // TODO: Implement business logic here.
     Logger.debug("Search RIB attached")
     router?.setupViews()
+    bind()
   }
   
   override func willResignActive() {
@@ -40,5 +44,47 @@ final class SearchInteractor: Interactor, SearchInteractable {
     
     router?.cleanupViews()
     // TODO: Pause any business logic.
+  }
+  
+  // MARK: - SearchResultsListener
+  var searchBooks: PublishSubject<(String?, Int?)> = PublishSubject<(String?, Int?)>()
+}
+
+private extension SearchInteractor {
+  func bind() {
+    // SearchResults RIB에서 검색 작업을 위임받음
+    searchBooks
+      .flatMap { (query, page) -> Observable<Result<BookList, Error>> in
+        return AsyncThrowingStream<BookList, Error> { continuation in
+          Task {
+            if let query = query {
+              do {
+                let resource = BookStoreResource.search(query, page)
+                let bookList = try await APIClient.shared.request(resource,
+                                                                  model: BookList.self)
+                continuation.yield(bookList)
+                continuation.finish()
+              } catch let error {
+                continuation.finish(throwing: error)
+              }
+            }
+          }
+        }
+        .asObservable()
+        .map { .success($0) }
+        .catch { .just(.failure($0)) }
+      }
+      .observe(on: MainScheduler.asyncInstance)
+      .subscribe(onNext: { [weak self] result in
+        // 작업은 SearchInteractor가 담당하지만
+        // 화면에 결과 표시는 SearchResults로 다시 던져야함
+        switch result {
+        case .success(let bookList):
+          self?.router?.updateResultsUI(bookList)
+        case .failure(let error):
+          self?.router?.updateResultsUI(error: error)
+        }
+      })
+      .disposeOnDeactivate(interactor: self)
   }
 }
