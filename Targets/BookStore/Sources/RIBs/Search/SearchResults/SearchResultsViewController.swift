@@ -55,7 +55,8 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
     books = bookList.books
     
     snapshot.deleteAllItems()
-
+    tableView.setContentOffset(.zero, animated: false)
+    
     snapshot.appendSections([0])
     snapshot.appendItems(books)
     dataSource.apply(snapshot, animatingDifferences: false)
@@ -63,6 +64,7 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
   
   func updateUI(error: Error) {
     activityIndicatorView.stopAnimating()
+    tableView.setContentOffset(.zero, animated: false)
     Logger.error("Search books occurred error \(error.localizedDescription)")
   }
 }
