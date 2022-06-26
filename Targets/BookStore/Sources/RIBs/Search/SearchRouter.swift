@@ -50,6 +50,7 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
     
     let searchResultsRouting = searchResultsBuilder.build(withListener: interactor)
     let searchResultsViewController = searchResultsRouting.viewControllable.uiviewController as? SearchResultsViewController
+    self.searchResultsRouting = searchResultsRouting
     attachChild(searchResultsRouting)
     
     assert(searchResultsViewController != nil, "Coudln't cast SearchResultsViewController")
