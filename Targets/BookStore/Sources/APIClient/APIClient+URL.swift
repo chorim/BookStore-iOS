@@ -11,8 +11,14 @@ import Foundation
 extension URL {
   func appendingQueryParameters(_ parameters: [String: Any], encoding: URLEncoding) -> URL {
     var urlComponents = URLComponents(url: self, resolvingAgainstBaseURL: true)!
-    urlComponents.query = (urlComponents.percentEncodedQuery.map { $0 + "&" } ?? "") + encoding.query(parameters)
     
+    let percentEncodedQuery = urlComponents.percentEncodedQuery.map { $0 + "&" } ?? ""
+    let urlComponentsQuery = percentEncodedQuery + encoding.query(parameters)
+    
+    if !urlComponentsQuery.isEmpty {
+      urlComponents.query = urlComponentsQuery
+    }
+
     return urlComponents.url!
   }
 }
