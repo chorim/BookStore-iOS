@@ -9,6 +9,7 @@
 import RIBs
 import RxSwift
 import UIKit
+import OrderedCollections
 
 protocol SearchResultsPresentableListener: AnyObject {
   // TODO: Declare properties and methods that the view controller can invoke to perform
@@ -39,7 +40,7 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
     }
   }
   
-  private var books: [Book] = []
+  private var books: OrderedSet<Book> = OrderedSet()
   private var dataSource: DataSource!
   private var snapshot = Snapshot()
   
@@ -75,12 +76,12 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
   }
   
   func updateUI(_ bookList: BookList) {
-    books = bookList.books
+    books = OrderedSet(bookList.books)
     snapshot.deleteAllItems()
     tableView.setContentOffset(.zero, animated: false)
     
     snapshot.appendSections([0])
-    snapshot.appendItems(books)
+    snapshot.appendItems(books.elements)
     dataSource.apply(snapshot, animatingDifferences: false)
   }
   
@@ -88,8 +89,10 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
     // append only
     books.append(contentsOf: bookList.books)
     page += 1
-    snapshot.appendItems(bookList.books)
-    dataSource.apply(snapshot, animatingDifferences: false)
+    
+    var copiedSnapshot = dataSource.snapshot()
+    copiedSnapshot.appendItems(bookList.books)
+    dataSource.apply(copiedSnapshot, animatingDifferences: false)
   }
   
   func updateUI(error: Error) {
@@ -100,7 +103,9 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
 
 private extension SearchResultsViewController {
   func setupUI() {
-    tableView.estimatedRowHeight = UITableView.automaticDimension
+    tableView.estimatedRowHeight = 133.0
+    tableView.rowHeight = UITableView.automaticDimension
+    
     // TODO: Extension으로 따로 빼야하는데 귀찮음
     tableView.register(UINib(nibName: "ListBookCell", bundle: Bundle.module),
                        forCellReuseIdentifier: "ListBookCell")

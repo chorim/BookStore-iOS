@@ -10,6 +10,7 @@ import ProjectDescription
 let dependencies = Dependencies(carthage: nil,
                                 swiftPackageManager: [
                                   .remote(url: "https://github.com/uber/RIBs", requirement: .upToNextMajor(from: "0.12.1")),
-                                  .remote(url: "https://github.com/apple/swift-log", requirement: .upToNextMajor(from: "1.0.0"))
+                                  .remote(url: "https://github.com/apple/swift-log", requirement: .upToNextMajor(from: "1.0.0")),
+                                  .remote(url: "https://github.com/apple/swift-collections.git", requirement: .upToNextMajor(from: "1.0.0"))
                                 ],
                                 platforms: [.iOS])
