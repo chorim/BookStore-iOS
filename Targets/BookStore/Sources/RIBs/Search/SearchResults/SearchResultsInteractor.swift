@@ -17,6 +17,7 @@ protocol SearchResultsPresentable: Presentable {
   var listener: SearchResultsPresentableListener? { get set }
   // TODO: Declare methods the interactor can invoke the presenter to present data.
   func updateUI(_ bookList: BookList)
+  func updateUI(contentsOf bookList: BookList)
   func updateUI(error: Error)
   
   var isSearching: Bool { get set }

@@ -32,6 +32,12 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
   
   private var task: Task<(), Never>?
   private var page: Int = 1
+  private var query: String? = nil {
+    didSet {
+      page = 1
+      listener?.searchBooks.onNext((query, page))
+    }
+  }
   
   private var books: [Book] = []
   private var dataSource: DataSource!
@@ -69,9 +75,7 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
   }
   
   func updateUI(_ bookList: BookList) {
-    activityIndicatorView.stopAnimating()
     books = bookList.books
-    
     snapshot.deleteAllItems()
     tableView.setContentOffset(.zero, animated: false)
     
@@ -80,8 +84,15 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
     dataSource.apply(snapshot, animatingDifferences: false)
   }
   
+  func updateUI(contentsOf bookList: BookList) {
+    // append only
+    books.append(contentsOf: bookList.books)
+    page += 1
+    snapshot.appendItems(bookList.books)
+    dataSource.apply(snapshot, animatingDifferences: false)
+  }
+  
   func updateUI(error: Error) {
-    activityIndicatorView.stopAnimating()
     tableView.setContentOffset(.zero, animated: false)
     Logger.error("Search books occurred error \(error.localizedDescription)")
   }
@@ -101,6 +112,18 @@ private extension SearchResultsViewController {
       return cell
     })
     tableView.dataSource = dataSource
+    tableView.delegate = self
+  }
+}
+
+extension SearchResultsViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView,
+                 willDisplay cell: UITableViewCell,
+                 forRowAt indexPath: IndexPath) {
+    if indexPath.row >= books.count - 2 {
+      Logger.info("Next page fetch need : \(String(describing: query)) \(page)")
+      listener?.searchBooks.onNext((query, page + 1))
+    }
   }
 }
 
@@ -108,12 +131,12 @@ private extension SearchResultsViewController {
 extension SearchResultsViewController: UISearchBarDelegate {
   func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
     Logger.info("Search button did clicked")
-    listener?.searchBooks.onNext((searchBar.text, nil))
+    query = searchBar.text
   }
   
   func searchBar(_ searchBar: UISearchBar,
                  textDidChange searchText: String) {
     Logger.info("textDidChage \(searchText)")
-    listener?.searchBooks.onNext((searchText, nil))
+    query = searchText
   }
 }
