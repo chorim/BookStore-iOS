@@ -18,6 +18,8 @@ protocol SearchResultsPresentable: Presentable {
   // TODO: Declare methods the interactor can invoke the presenter to present data.
   func updateUI(_ bookList: BookList)
   func updateUI(error: Error)
+  
+  var isSearching: Bool { get set }
 }
 
 protocol SearchResultsListener: AnyObject {
@@ -60,6 +62,7 @@ private extension SearchResultsInteractor {
       .filter { $0.0 != nil && ($0.0?.count ?? 0) > 2 }
       .subscribe(onNext: { [weak self] (query, page) in
         // 실제로 검색을 실행하는 RIB으로 작업을 위임함
+        self?.presenter.isSearching = true
         self?.listener?.searchBooks.onNext((query, page))
       })
       .disposeOnDeactivate(interactor: self)

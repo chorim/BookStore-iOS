@@ -37,6 +37,24 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
   private var dataSource: DataSource!
   private var snapshot = Snapshot()
   
+  var isSearching: Bool = false {
+    didSet {
+      if isSearching {
+        activityIndicatorView.startAnimating()
+        tableView.tableFooterView = nil
+      } else {
+        activityIndicatorView.stopAnimating()
+        tableView.tableFooterView = books.count > 0 ? loadingCellView : nil
+      }
+    }
+  }
+  
+  private lazy var loadingCellView: UIView? = {
+    return UINib(nibName: "ListLoadingCell",
+                 bundle: Bundle.module).instantiate(withOwner: self,
+                                                    options: nil).first as? UIView
+  }()
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -72,6 +90,7 @@ final class SearchResultsViewController: UIViewController, SearchResultsPresenta
 private extension SearchResultsViewController {
   func setupUI() {
     tableView.estimatedRowHeight = UITableView.automaticDimension
+    // TODO: Extension으로 따로 빼야하는데 귀찮음
     tableView.register(UINib(nibName: "ListBookCell", bundle: Bundle.module),
                        forCellReuseIdentifier: "ListBookCell")
     dataSource = DataSource(tableView: tableView, cellProvider: { tableView, indexPath, item in
@@ -89,14 +108,12 @@ private extension SearchResultsViewController {
 extension SearchResultsViewController: UISearchBarDelegate {
   func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
     Logger.info("Search button did clicked")
-    activityIndicatorView.startAnimating()
     listener?.searchBooks.onNext((searchBar.text, nil))
   }
   
   func searchBar(_ searchBar: UISearchBar,
                  textDidChange searchText: String) {
     Logger.info("textDidChage \(searchText)")
-    activityIndicatorView.startAnimating()
     listener?.searchBooks.onNext((searchText, nil))
   }
 }

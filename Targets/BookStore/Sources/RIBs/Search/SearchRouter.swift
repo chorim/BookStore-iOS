@@ -68,11 +68,13 @@ final class SearchRouter: Router<SearchInteractable>, SearchRouting {
   func updateResultsUI(_ bookList: BookList) {
     assert(searchResultsViewController != nil, "The SearchResultsViewController has not been initialized")
     searchResultsViewController?.updateUI(bookList)
+    searchResultsViewController?.isSearching = false
   }
   
   func updateResultsUI(error: Error) {
     assert(searchResultsViewController != nil, "The SearchResultsViewController has not been initialized")
     searchResultsViewController?.updateUI(error: error)
+    searchResultsViewController?.isSearching = false
   }
   
   // MARK: - Private
