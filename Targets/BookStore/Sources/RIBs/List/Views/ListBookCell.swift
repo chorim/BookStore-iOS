@@ -29,11 +29,10 @@ class ListBookCell: UITableViewCell {
   
   override func prepareForReuse() {
     super.prepareForReuse()
-    if let task = task, !task.isCancelled {
-      task.cancel()
-    }
     
-    task = Task { @MainActor in
+    thumbImageView.cancel()
+    
+    Task { @MainActor in
       self.thumbImageView.setImage(nil)
       self.titleLabel.text = nil
       self.descLabel.text = nil
@@ -42,8 +41,8 @@ class ListBookCell: UITableViewCell {
   }
   
   func setupUI(_ book: Book) {
-    task = Task { @MainActor in
-      self.thumbImageView.setImage(book.image)
+    Task { @MainActor in
+      self.thumbImageView.setImage(url: book.image)
       self.titleLabel.text = book.title
       self.descLabel.text = book.subtitle
       self.descLabel.sizeToFit()

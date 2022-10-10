@@ -34,20 +34,21 @@ extension APIClient {
 }
 
 extension UIImageView {
-  func setImage(_ imageUrl: String) {
-    Task.detached(priority: .background) {
+  func setImage(url: String) {
+    task = Task.detached(priority: .background) {
       try Task.checkCancellation()
       
-      guard let imageURL = URL(string: imageUrl) else {
+      guard let imageURL = URL(string: url) else {
         throw URLError(.badURL)
       }
       
       let cacheKey = imageURL.lastPathComponent
       
       if let image = ImageCacheProvider.shared.get(key: cacheKey) {
+        try Task.checkCancellation()
         await self.setImage(image)
       } else {
-        let image = try await APIClient.shared.requestImage(imageUrl)
+        let image = try await APIClient.shared.requestImage(url)
         try Task.checkCancellation()
         await self.setImage(image)
         if let image = image {
@@ -62,13 +63,20 @@ extension UIImageView {
     self.image = image
   }
   
-  func cancel() {}
+  func cancel() {
+    if let task {
+      guard !task.isCancelled else { return }
+      task.cancel()
+    }
+  }
 }
 
 // MARK: ImageCacheProvider
 final class ImageCacheProvider {
   private let cache = NSCache<NSString, UIImage>()
-  private init() {}
+  private init() {
+    cache.countLimit = 100
+  }
   
   static let shared = ImageCacheProvider()
   
