@@ -43,7 +43,7 @@ extension UIImageView {
       }
       
       let cacheKey = imageURL.lastPathComponent
-      
+
       if let image = ImageCacheProvider.shared.get(key: cacheKey) {
         try Task.checkCancellation()
         await self.setImage(image)
@@ -68,23 +68,5 @@ extension UIImageView {
       guard !task.isCancelled else { return }
       task.cancel()
     }
-  }
-}
-
-// MARK: ImageCacheProvider
-final class ImageCacheProvider {
-  private let cache = NSCache<NSString, UIImage>()
-  private init() {
-    cache.countLimit = 100
-  }
-  
-  static let shared = ImageCacheProvider()
-  
-  func put(_ key: String, image: UIImage) {
-    cache.setObject(image, forKey: key as NSString)
-  }
-  
-  func get(key: String) -> UIImage? {
-    return cache.object(forKey: key as NSString)
   }
 }
